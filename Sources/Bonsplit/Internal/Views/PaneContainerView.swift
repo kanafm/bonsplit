@@ -147,10 +147,10 @@ struct PaneDropInteractionContainer<Content: View, DropLayer: View>: View {
 
 /// Container for a single pane with its tab bar and content area
 struct PaneContainerView<Content: View, EmptyContent: View>: View {
-    @Environment(BonsplitController.self) private var bonsplitController
+    @EnvironmentObject private var bonsplitController: BonsplitController
 
-    @Bindable var pane: PaneState
-    @Bindable var controller: SplitViewController
+    @ObservedObject var pane: PaneState
+    @ObservedObject var controller: SplitViewController
     let contentBuilder: (TabItem, PaneID) -> Content
     let emptyPaneBuilder: (PaneID) -> EmptyContent
     var showSplitButtons: Bool = true

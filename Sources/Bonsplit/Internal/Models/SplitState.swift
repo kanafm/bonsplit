@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import SwiftUI
 
@@ -8,16 +9,18 @@ enum SplitAnimationOrigin {
 }
 
 /// State for a split node (branch in the split tree)
-@Observable
-final class SplitState: Identifiable {
+///
+/// Converted from `@Observable` to `ObservableObject + @Published` (Nix build
+/// compatibility — see PaneState.swift).
+final class SplitState: ObservableObject, Identifiable {
     let id: UUID
-    var orientation: SplitOrientation
-    var first: SplitNode
-    var second: SplitNode
-    var dividerPosition: CGFloat  // 0.0 to 1.0
+    @Published var orientation: SplitOrientation
+    @Published var first: SplitNode
+    @Published var second: SplitNode
+    @Published var dividerPosition: CGFloat  // 0.0 to 1.0
 
     /// Animation origin for entry animation (nil = no animation needed)
-    var animationOrigin: SplitAnimationOrigin?
+    @Published var animationOrigin: SplitAnimationOrigin?
 
     init(
         id: UUID = UUID(),

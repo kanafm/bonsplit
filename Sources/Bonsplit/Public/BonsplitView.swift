@@ -18,7 +18,7 @@ import SwiftUI
 /// }
 /// ```
 public struct BonsplitView<Content: View, EmptyContent: View>: View {
-    @Bindable private var controller: BonsplitController
+    @ObservedObject private var controller: BonsplitController
     private let contentBuilder: (Tab, PaneID) -> Content
     private let emptyPaneBuilder: (PaneID) -> EmptyContent
 
@@ -54,8 +54,8 @@ public struct BonsplitView<Content: View, EmptyContent: View>: View {
             enableAnimations: controller.configuration.appearance.enableAnimations,
             animationDuration: controller.configuration.appearance.animationDuration
         )
-        .environment(controller)
-        .environment(controller.internalController)
+        .environmentObject(controller)
+        .environmentObject(controller.internalController)
     }
 }
 

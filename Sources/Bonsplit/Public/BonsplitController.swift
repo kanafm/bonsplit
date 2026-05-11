@@ -1,10 +1,13 @@
+import Combine
 import Foundation
 import SwiftUI
 
 /// Main controller for the split tab bar system
+///
+/// Converted from `@Observable` to `ObservableObject + @Published` for the Nix
+/// build path (nixpkgs swift doesn't support the `macro` language feature).
 @MainActor
-@Observable
-public final class BonsplitController {
+public final class BonsplitController: ObservableObject {
 
     public struct ExternalTabDropRequest {
         public enum Destination {
@@ -41,12 +44,14 @@ public final class BonsplitController {
     // MARK: - Configuration
 
     /// Configuration for behavior and appearance
-    public var configuration: BonsplitConfiguration
+    @Published public var configuration: BonsplitConfiguration
 
     /// When false, drop delegates reject all drags. Set to false for inactive workspaces
     /// so their views (kept alive in a ZStack for state preservation) don't intercept drags
     /// meant for the active workspace.
-    @ObservationIgnored public var isInteractive: Bool = true {
+    /// (Was `@ObservationIgnored` under @Observable — now a plain stored property; ObservableObject
+    ///  only fires on `@Published` mutations.)
+    public var isInteractive: Bool = true {
         didSet { internalController.isInteractive = isInteractive }
     }
 
@@ -55,31 +60,31 @@ public final class BonsplitController {
     /// Pane focus is internal to Bonsplit, but host apps can move keyboard focus
     /// to external controls while keeping the focused pane selected. Set this
     /// to false when pane-number shortcuts should not currently be advertised.
-    public var tabShortcutHintsEnabled: Bool = true {
+    @Published public var tabShortcutHintsEnabled: Bool = true {
         didSet { internalController.tabShortcutHintsEnabled = tabShortcutHintsEnabled }
     }
 
     /// Handler for file/URL drops from external apps (e.g., Finder).
     /// Called when files are dropped onto a pane's content area.
     /// Return `true` if the drop was handled.
-    @ObservationIgnored public var onFileDrop: ((_ urls: [URL], _ paneId: PaneID) -> Bool)? {
+    public var onFileDrop: ((_ urls: [URL], _ paneId: PaneID) -> Bool)? {
         didSet { internalController.onFileDrop = onFileDrop }
     }
 
     /// Handler for tab drops originating from another Bonsplit controller (e.g. another workspace/window).
     /// Return `true` when the drop has been handled by the host application.
-    @ObservationIgnored public var onExternalTabDrop: ((ExternalTabDropRequest) -> Bool)?
+    public var onExternalTabDrop: ((ExternalTabDropRequest) -> Bool)?
 
     /// Handler for file drops from external apps, routed through pane drop zones.
     /// Return `true` when the drop has been handled by the host application.
-    @ObservationIgnored public var onExternalFileDrop: ((ExternalFileDropRequest) -> Bool)?
+    public var onExternalFileDrop: ((ExternalFileDropRequest) -> Bool)?
 
     /// Host-provided destinations for the tab context menu's Move Tab submenu.
-    @ObservationIgnored public var tabContextMoveDestinationsProvider: ((TabID, PaneID) -> [TabContextMoveDestination])?
+    public var tabContextMoveDestinationsProvider: ((TabID, PaneID) -> [TabContextMoveDestination])?
 
     /// Called when the user explicitly requests to close a tab from the tab strip UI.
     /// Internal host-driven closes should not use this hook.
-    @ObservationIgnored public var onTabCloseRequest: ((_ tabId: TabID, _ paneId: PaneID) -> Void)?
+    public var onTabCloseRequest: ((_ tabId: TabID, _ paneId: PaneID) -> Void)?
 
     // MARK: - Internal State
 

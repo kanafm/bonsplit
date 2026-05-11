@@ -1,63 +1,67 @@
+import Combine
 import Foundation
 import SwiftUI
 
 /// Central controller managing the entire split view state (internal implementation)
-@Observable
+///
+/// Converted from `@Observable` to `ObservableObject + @Published` (Nix build
+/// compatibility — see PaneState.swift). `@ObservationIgnored` properties
+/// become plain `var` since ObservableObject only fires on `@Published`
+/// mutations.
 @MainActor
-final class SplitViewController {
+final class SplitViewController: ObservableObject {
     /// The root node of the split tree
-    var rootNode: SplitNode
+    @Published var rootNode: SplitNode
 
     /// Currently zoomed pane. When set, rendering should only show this pane.
-    var zoomedPaneId: PaneID?
+    @Published var zoomedPaneId: PaneID?
 
     /// Currently focused pane ID
-    var focusedPaneId: PaneID?
+    @Published var focusedPaneId: PaneID?
 
     /// Tab currently being dragged (for visual feedback and hit-testing).
-    /// This is @Observable so SwiftUI views react (e.g. allowsHitTesting).
-    var draggingTab: TabItem?
+    @Published var draggingTab: TabItem?
 
     /// Monotonic counter incremented on each drag start. Used to invalidate stale
     /// timeout timers that would otherwise cancel a new drag of the same tab.
-    var dragGeneration: Int = 0
+    @Published var dragGeneration: Int = 0
 
     /// Source pane of the dragging tab
-    var dragSourcePaneId: PaneID?
+    @Published var dragSourcePaneId: PaneID?
 
     /// Non-observable drag session state. Drop delegates read these instead of the
-    /// @Observable properties above, because SwiftUI batches observable updates and
+    /// @Published properties above, because SwiftUI batches observable updates and
     /// createItemProvider's writes may not be visible to validateDrop/performDrop yet.
-    @ObservationIgnored var activeDragTab: TabItem?
-    @ObservationIgnored var activeDragSourcePaneId: PaneID?
+    var activeDragTab: TabItem?
+    var activeDragSourcePaneId: PaneID?
 
     /// When false, drop delegates reject all drags and NSViews are hidden.
     /// Mirrors BonsplitController.isInteractive. Must be observable so
     /// updateNSView is called to toggle isHidden on the AppKit containers.
-    var isInteractive: Bool = true
+    @Published var isInteractive: Bool = true
 
     /// When false, pane tab shortcut hints stay hidden even if this pane is
     /// selected. The host app owns this because keyboard focus can move outside
     /// Bonsplit while the selected pane remains unchanged.
-    var tabShortcutHintsEnabled: Bool = true
+    @Published var tabShortcutHintsEnabled: Bool = true
 
     /// Handler for file/URL drops from external apps (e.g. Finder).
     /// Receives the dropped URLs and the pane ID where the drop occurred.
-    @ObservationIgnored var onFileDrop: ((_ urls: [URL], _ paneId: PaneID) -> Bool)?
+    var onFileDrop: ((_ urls: [URL], _ paneId: PaneID) -> Bool)?
 
     /// During drop, SwiftUI may keep the source tab view alive briefly (default removal animation)
     /// even after we've updated the model. Hide it explicitly so it disappears immediately.
-    var dragHiddenSourceTabId: UUID?
-    var dragHiddenSourcePaneId: PaneID?
+    @Published var dragHiddenSourceTabId: UUID?
+    @Published var dragHiddenSourcePaneId: PaneID?
 
     /// Current frame of the entire split view container
-    var containerFrame: CGRect = .zero
+    @Published var containerFrame: CGRect = .zero
 
     /// Flag to prevent notification loops during external updates
-    var isExternalUpdateInProgress: Bool = false
+    @Published var isExternalUpdateInProgress: Bool = false
 
     /// Timestamp of last geometry notification for debouncing
-    var lastGeometryNotificationTime: TimeInterval = 0
+    @Published var lastGeometryNotificationTime: TimeInterval = 0
 
     /// Callback for geometry changes
     var onGeometryChange: (() -> Void)?
