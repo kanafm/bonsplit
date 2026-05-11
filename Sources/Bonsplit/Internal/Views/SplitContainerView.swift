@@ -88,7 +88,7 @@ private final class DebugSplitView: ThemedSplitView {
 
 /// SwiftUI wrapper around NSSplitView for native split behavior
 struct SplitContainerView<Content: View, EmptyContent: View>: NSViewRepresentable {
-    @Bindable var splitState: SplitState
+    @ObservedObject var splitState: SplitState
     let controller: SplitViewController
     let appearance: BonsplitConfiguration.Appearance
     let contentBuilder: (TabItem, PaneID) -> Content

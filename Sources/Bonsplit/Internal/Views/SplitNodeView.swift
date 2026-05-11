@@ -3,7 +3,7 @@ import AppKit
 
 /// Recursively renders a split node (pane or split)
 struct SplitNodeView<Content: View, EmptyContent: View>: View {
-    @Environment(SplitViewController.self) private var controller
+    @EnvironmentObject private var controller: SplitViewController
 
     let node: SplitNode
     let contentBuilder: (TabItem, PaneID) -> Content
@@ -88,7 +88,7 @@ final class SplitArrangedContainerView: NSView {
 
 /// Wrapper that uses NSHostingController for proper AppKit layout constraints
 struct SinglePaneWrapper<Content: View, EmptyContent: View>: NSViewRepresentable {
-    @Environment(SplitViewController.self) private var controller
+    @EnvironmentObject private var controller: SplitViewController
     
     let pane: PaneState
     let contentBuilder: (TabItem, PaneID) -> Content

@@ -1,12 +1,17 @@
+import Combine
 import Foundation
 import SwiftUI
 
 /// State for a single pane (leaf node in the split tree)
-@Observable
-final class PaneState: Identifiable {
+///
+/// Converted from `@Observable` to `ObservableObject + @Published` for the Nix
+/// build path: nixpkgs's swift compiler doesn't support the `macro` language
+/// feature, so `@Observable` cannot expand. ObservableObject is the
+/// pre-Swift-5.9 SwiftUI observation pattern and works on every toolchain.
+final class PaneState: ObservableObject, Identifiable {
     let id: PaneID
-    var tabs: [TabItem]
-    var selectedTabId: UUID?
+    @Published var tabs: [TabItem]
+    @Published var selectedTabId: UUID?
 
     init(
         id: PaneID = PaneID(),
